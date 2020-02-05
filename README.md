@@ -12,5 +12,5 @@ Term: Spring 2020
 + Project title: Lyrics
 + This project is conducted by Qing Gao
 
-+ Project summary: this project contained the lyrics analysis by using the dataset of 100,000+ song lyrics from MetroLyrics. The project focused on analyzing the difference between music genre, such as rock, pop, metal, country, etc. The analysis used the tools of sentiment analysis and other analyst tools. 
++ Project summary: this project contained the lyrics analysis by using the dataset of 100,000+ song lyrics from MetroLyrics. The project focused on analyzing the difference between music genre, such as rock, pop, metal, country, etc. The analysis used the tools of sentiment analysis, topic modeling and other analyst tools. 
 
