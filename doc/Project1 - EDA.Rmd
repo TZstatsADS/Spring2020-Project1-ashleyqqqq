@@ -1,0 +1,209 @@
+---
+title: "Project1: Lyrics Analysis"
+author: "Qing Gao"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidytext)
+library(dplyr)
+library(wordcloud)
+library(topicmodels)
+```
+
+
+```{r someVar, echo=FALSE}
+# load processed lyrics data & artists data
+load('../output/processed_lyrics.RData') 
+artists.csv <- read.csv('../data/artists.csv')
+```
+
+
+## Genre
+```{r, echo=FALSE}
+# select the genre from the processed lyrics
+genre <- dt_lyrics %>% select(genre, stemmedwords)
+
+# rank of the genre
+rank <- genre %>% group_by(genre) %>%
+  count() %>%
+  arrange(desc(n))
+
+rank$genre[1:6]
+
+# frequency plot of the genre
+ggplot(genre, aes(genre)) +
+  geom_bar()
+
+
+```
+We can find that Rock, Pop and Metal music dominant our datasets, and we are going to explore more about these three music genre. 
+
+
+## Lyrics Length & Genre
+```{r, echo=FALSE}
+
+
+```
+
+
+
+## Genre & Emotion: Rock
+Let's look at Rock music at first, and do a sentiment analysis on its lyrics. 
+```{r, echo=FALSE}
+# get sentiment for lyrics in the rock music
+rock_lyrics <- dt_lyrics %>% filter(genre == 'Rock') %>% 
+  select(stemmedwords) %>%
+  unnest_tokens(word, stemmedwords) %>%
+  left_join(get_sentiments("nrc"), by = c('word')) %>%
+  filter(!is.na(sentiment))
+
+# sentiment percent for rock music
+rock_sentiment <- rock_lyrics %>% group_by(sentiment) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  ungroup() %>%
+  mutate(n = n / sum(n))
+rock_sentiment
+
+# drawing a pie chart
+ggplot(rock_sentiment, aes(x = '', y = n, fill = sentiment)) +
+  geom_bar(width = 1, stat = 'identity') +
+  coord_polar('y', start = 0) +
+  labs(x = '', y = '', title = 'Sentiments for Rock Music') +
+  scale_fill_brewer(palette="Set3") +
+  theme_light()
+
+# select high frequency words from each emotions
+top10_rock <- rock_lyrics %>%
+  count(word, sentiment) %>%
+  group_by(sentiment) %>%
+  top_n(n = 10) %>%
+  ungroup()
+
+# plot the high frequency words with group of different emotions
+ggplot(top10_rock, aes(x = reorder(word, n), y = n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales="free") +
+  labs(x = 'Word', y = 'Contribution to sentiment') +
+  coord_flip() +
+  theme_light()
+
+# Word Cloud: Rock
+rock_lyrics %>% anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100))
+```
+
+
+
+## Genre & Emotion: Pop
+```{r, echo=FALSE}
+# get sentiment for lyrics in the rock music
+pop_lyrics <- dt_lyrics %>% filter(genre == 'Pop') %>% 
+  select(stemmedwords) %>%
+  unnest_tokens(word, stemmedwords) %>%
+  left_join(get_sentiments("nrc"), by = c('word')) %>%
+  filter(!is.na(sentiment))
+
+# sentiment percent for rock music
+pop_sentiment <- pop_lyrics %>% group_by(sentiment) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  ungroup() %>%
+  mutate(n = n / sum(n))
+pop_sentiment
+
+# drawing a pie chart
+ggplot(pop_sentiment, aes(x = '', y = n, fill = sentiment)) +
+  geom_bar(width = 1, stat = 'identity') +
+  coord_polar('y', start = 0) +
+  labs(x = '', y = '', title = 'Sentiments for Pop Music') +
+  scale_fill_brewer(palette="Paired") +
+  theme_light()
+
+# select high frequency words from each emotions
+top10_pop <- pop_lyrics %>%
+  count(word, sentiment) %>%
+  group_by(sentiment) %>%
+  top_n(n = 10) %>%
+  ungroup()
+
+# plot the high frequency words with group of different emotions
+ggplot(top10_pop, aes(x = reorder(word, n), y = n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales="free") +
+  labs(x = 'Word', y = 'Contribution to sentiment') +
+  coord_flip() +
+  theme_light()
+
+# Word Cloud: Pop
+pop_lyrics %>% anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100))
+```
+
+## Genre & Emotion: Metal
+```{r, echo=FALSE}
+# get sentiment for lyrics in the rock music
+metal_lyrics <- dt_lyrics %>% filter(genre == 'Metal') %>% 
+  select(stemmedwords) %>%
+  unnest_tokens(word, stemmedwords) %>%
+  left_join(get_sentiments("nrc"), by = c('word')) %>%
+  filter(!is.na(sentiment))
+
+# sentiment percent for rock music
+metal_sentiment <- metal_lyrics %>% group_by(sentiment) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  ungroup() %>%
+  mutate(n = n / sum(n))
+metal_sentiment
+
+# drawing a pie chart
+ggplot(metal_sentiment, aes(x = '', y = n, fill = sentiment)) +
+  geom_bar(width = 1, stat = 'identity') +
+  coord_polar('y', start = 0) +
+  labs(x = '', y = '', title = 'Sentiments for Metal Music') +
+  scale_fill_brewer(palette="Paired") +
+  theme_light()
+
+# select high frequency words from each emotions
+top10_metal <- metal_lyrics %>%
+  count(word, sentiment) %>%
+  group_by(sentiment) %>%
+  top_n(n = 10) %>%
+  ungroup()
+
+# plot the high frequency words with group of different emotions
+ggplot(top10_metal, aes(x = reorder(word, n), y = n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, scales="free") +
+  labs(x = 'Word', y = 'Contribution to sentiment') +
+  coord_flip() +
+  theme_light()
+
+# Word Cloud: Metal
+metal_lyrics %>% anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 100))
+```
+
+## Topic Modeling
+```{r, echo=FALSE}
+# set a seed so that the output of the model is predictable
+#ap_lda <- LDA(dt_lyrics, k = 2, control = list(seed = 1234))
+#ap_lda
+
+
+
+```
+
+
+
